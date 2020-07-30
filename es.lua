@@ -56,7 +56,7 @@ function init()
   m = midi.connect()
   m.event = midi_event
 
-  pat = pattern_time.new()
+  pat = pattern_time.new("pat")
   pat.process = grid_note_trans
 
   params:add_option("enc2","enc2", {"shape","timbre","noise","cut"})
@@ -249,17 +249,17 @@ function enc(n,d)
   if n == 1 then
     local sync_rec = pat.sync_record and 2 or 1
     sync_rec = util.clamp(sync_rec+d,1,2)
-    pat.sync_record = sync_rec == 2 and true or false
+    params:set(pat.name.."_sync_recording",sync_rec)
   elseif n == 2 then
     local sync_play = pat.sync_start and 2 or 1
     sync_play = util.clamp(sync_play+d,1,2)
-    pat.sync_start = sync_play == 2 and true or false
+    params:set(pat.name.."_sync_start",sync_play)
   elseif n == 3 then
-    local quant = pat.quantized and 1 or 0
+    local quant = pat.quantized and 2 or 1
     local pre = quant
-    quant = util.clamp(quant+d,0,1)
+    quant = util.clamp(quant+d,1,2)
     if pre ~= quant then
-      pat:quantize(quant)
+      params:set(pat.name.."_quantization",quant)
     end
   end
 end
@@ -378,7 +378,6 @@ function redraw()
   screen.move(0,40)
   screen.font_size(8)
   local bar_count = string.format("%.4g", pat.rec_duration / 4)
-  local beats = {"none",4,8,12,16}
   screen.text("clamp to "..pat.rec_duration.." beats: "..(pat.sync_record and "true" or "false"))
   screen.move(0,50)
   screen.text("sync playback to '1': "..(pat.sync_start and "true" or "false"))

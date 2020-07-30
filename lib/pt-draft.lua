@@ -5,7 +5,7 @@ local pattern = {}
 pattern.__index = pattern
 
 --- constructor
-function pattern.new()
+function pattern.new(id)
   local i = {}
   setmetatable(i, pattern)
   i.rec_state = 0
@@ -34,10 +34,42 @@ function pattern.new()
   i.sync_start = false -- replaying a pattern will sync to the specified launch_timing
   i.launch_timing = "bar" -- if synced_start, then wait till next bar or beat to restart pattern
   i.start_pending = false -- synced restart is currently pending
+  i.name = id
 
   i.metro = metro.init(function() i:next_event() end,1,1)
 
   i.process = function(_) print("event") end
+
+  if i.name == nil then
+    i.name = "pattern"
+  end
+  params:add_group("PATTERNS",6)
+  params:add_separator(i.name)
+  params:add_option(i.name.."_sync_recording","sync pattern to clock?",{"no","yes"})
+  params:set_action(i.name.."_sync_recording", function(x)
+    if x == 1 then i.sync_record = false else i.sync_record = true end
+  end
+  )
+  params:add_number(i.name.."_rec_duration","---> rec duration (beats)",1,128,8)
+  params:set_action(i.name.."_rec_duration", function(x)
+    i.rec_duration = x
+  end
+  )
+  params:add_option(i.name.."_sync_start","sync launch to clock?",{"no","yes"})
+  params:set_action(i.name.."_sync_start", function(x)
+    if x == 1 then i.sync_start = false else i.sync_start = true end
+  end
+  )
+  params:add_option(i.name.."_launch_timing","---> timing",{"bar","beat"})
+  params:set_action(i.name.."_launch_timing", function(x)
+    i.launch_timing = x == 1 and "bar" or "beat"
+  end
+  )
+  params:add_option(i.name.."_quantization","quantization",{"off","on"})
+  params:set_action(i.name.."_quantization", function(x)
+    i:quantize(x-1)
+  end
+  )
 
   return i
 end
