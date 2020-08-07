@@ -142,7 +142,7 @@ function g.key(x, y, z)
       elseif y == 3 then
         pat:overdub(pat.overdub_state == 1 and 0 or 1)
       elseif y == 7 then
-        pat.loop = pat.loop == 1 and 0 or 1
+        pat:loop(pat.loop_state == 1 and 0 or 1)
       elseif y == 8 then
         mode_transpose = 1 - mode_transpose
       end
@@ -234,7 +234,7 @@ function gridredraw()
   g:led(1,1,2 + (pat.record_pending == false and (pat.rec_state * 10) or 5))
   g:led(1,2,2 + (pat.start_pending == false and (pat.play_state * 10) or 5))
   g:led(1,3,2 + pat.overdub_state * 10)
-  g:led(1,7,2 + pat.loop * 5)
+  g:led(1,7,2 + pat.loop_state * 5)
   g:led(1,8,2 + mode_transpose * 10)
 
   if mode_transpose == 1 then g:led(trans.x, trans.y, 4) end

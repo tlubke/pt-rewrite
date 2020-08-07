@@ -21,7 +21,7 @@ function pattern.new(id)
   i.step = 0
   i.runner = 1
   i.time_factor = 1
-  i.loop = 1
+  i.loop_state = 1
   i.start_point = 0
   i.end_point = 0
   i.clock = nil
@@ -45,12 +45,12 @@ function pattern.new(id)
   end
   params:add_group("PATTERNS",6)
   params:add_separator(i.name)
-  params:add_option(i.name.."_sync_recording","sync pattern to clock?",{"no","yes"})
+  params:add_option(i.name.."_sync_recording","sync record to clock?",{"no","yes"})
   params:set_action(i.name.."_sync_recording", function(x)
     if x == 1 then i.sync_record = false else i.sync_record = true end
   end
   )
-  params:add_number(i.name.."_rec_duration","---> rec duration (beats)",1,128,8)
+  params:add_number(i.name.."_rec_duration","---> rec duration (beats)",1,256,8)
   params:set_action(i.name.."_rec_duration", function(x)
     i.rec_duration = x
   end
@@ -297,7 +297,7 @@ function pattern:synced_loop()
     clock.sync(1/8)
     if self.synced_loop_runner == self.rec_duration * 8 then
       local overdub_flag = self.overdub_state
-      if self.loop == 1 then
+      if self.loop_state == 1 then
         self:unsynced_stop()
         if overdub_flag == 1 then
           self.overdub_state = 1
@@ -410,9 +410,9 @@ function pattern:next_event()
   local diff = nil
   self.prev_time = util.time()
   if self.count == self.end_point then diff = self.count else diff = self.end_point end
-  if self.step == diff and self.loop == 1 then
+  if self.step == diff and self.loop_state == 1 then
     self.step = self.start_point
-  elseif self.step > diff and self.loop == 1 then
+  elseif self.step > diff and self.loop_state == 1 then
     self.step = self.start_point
   else
     self.step = self.step + 1
@@ -420,7 +420,7 @@ function pattern:next_event()
   self.process(self.event[self.step])
   self.metro.time = self.time[self.step] * self.time_factor
   self.curr_time[self.step] = util.time()
-  if self.step == diff and self.loop == 0 then
+  if self.step == diff and self.loop_state == 0 then
     if self.play_state == 1 then
       self.play_state = 0
       self.metro:stop()
@@ -451,6 +451,14 @@ function pattern:overdub(state)
     self.overdub_state = 1
   else
     self.overdub_state = 0
+  end
+end
+
+function pattern:loop(state)
+  if state == 1 or state == 0 then
+    self.loop_state = state
+  else
+    print("invalid argument to ':loop', use 1 or 0")
   end
 end
 
