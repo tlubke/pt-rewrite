@@ -46,28 +46,29 @@ function pattern.new(id)
   params:add_group("PATTERNS",6)
   params:add_separator(i.name)
   params:add_option(i.name.."_sync_recording","sync record to clock?",{"no","yes"})
-  params:set_action(i.name.."_sync_recording", function(x)
-    if x == 1 then i.sync_record = false else i.sync_record = true end
+  params:set_action(i.name.."_sync_recording", function(option) -- x -> option to reflect param type
+    i.sync_record = (option == 1) and false or true             -- consistent with other ternary statements
+  --i.sync_record = if (option == 1) then false else true end   -- might be a little more readable
   end
   )
   params:add_number(i.name.."_rec_duration","---> rec duration (beats)",1,256,8)
-  params:set_action(i.name.."_rec_duration", function(x)
-    i.rec_duration = x
+  params:set_action(i.name.."_rec_duration", function(n)        -- x -> n to reflect number
+    i.rec_duration = n
   end
   )
   params:add_option(i.name.."_sync_start","sync launch to clock?",{"no","yes"})
-  params:set_action(i.name.."_sync_start", function(x)
-    if x == 1 then i.sync_start = false else i.sync_start = true end
+  params:set_action(i.name.."_sync_start", function(option)     -- rename cont.
+    i.sync_start = (option == 1) and false or true              -- ternary cont.
   end
   )
   params:add_option(i.name.."_launch_timing","---> timing",{"bar","beat"})
-  params:set_action(i.name.."_launch_timing", function(x)
-    i.launch_timing = x == 1 and "bar" or "beat"
+  params:set_action(i.name.."_launch_timing", function(option)
+    i.launch_timing = (option == 1) and "bar" or "beat"         -- parenthesize for readability
   end
   )
   params:add_option(i.name.."_quantization","quantization",{"off","on"})
-  params:set_action(i.name.."_quantization", function(x)
-    i:quantize(x-1)
+  params:set_action(i.name.."_quantization", function(option)   -- rename cont.
+    i:quantize(option - 1)
   end
   )
 
@@ -107,9 +108,9 @@ function pattern:clear()
 end
 
 --- adjust the time factor of this pattern.
--- @tparam number f time factor
-function pattern:set_time_factor(f)
-  self.time_factor = f or 1
+-- @tparam number n time factor
+function pattern:set_time_factor(n)            -- f -> n
+  self.time_factor = n or 1                    -- is type safety important?
 end
 
 --- start recording
@@ -153,7 +154,7 @@ function pattern:rec(state)
 end
 
 --- watch
-function pattern:watch(e)
+function pattern:watch(e) -- "e" is event? maybe match rec_event and name it watch_event(e)
   if self.rec_state == 1 then
     self:rec_event(e)
   elseif self.overdub_state == 1 then
