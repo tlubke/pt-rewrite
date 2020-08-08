@@ -1,6 +1,8 @@
 --- pattern_time
 -- @classmod pattern_time
 
+local pattern = include 'lib/pattern'
+
 local pattern_time = {}
 pattern_time.__index = pattern_time
 
@@ -64,3 +66,5 @@ end
 function pattern_time:rate(rate)
     self.rate = util.clamp(0.001, 10, rate)
 end
+
+return pattern_time

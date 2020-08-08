@@ -1,6 +1,8 @@
 --- pattern
 -- @classmod pattern
 
+local pattern_event = include 'lib/pattern_event'
+
 local pattern = {}
 pattern.__index = pattern
 

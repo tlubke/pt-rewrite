@@ -11,3 +11,5 @@ function pattern_event.new(event, t)
     i.duration = duration or 0
     return i
 end
+
+return pattern_event
