@@ -4,10 +4,10 @@
 local pattern_event = {}
 pattern_event.__index = pattern_event
 
-function pattern_event.new(event, t)
+function pattern_event.new(data, t)
     local i = {}
     setmetatable(i, pattern_event)
-    i.event = event or nil
+    i.data = data or nil
     i.duration = duration or 0
     return i
 end

@@ -10,13 +10,15 @@ pattern.__index = pattern
 function pattern.new(id, handle_event)
   local i = {}
   setmetatable(i, pattern)
-  i.name = id
+  i.id = id
+  i.handle_event = handle_event or function(data) print(data) end
   i.rec_state = 0
   i.play_state = 0
   i.overdub_state = 0
   i.events = {}
   i.event_count = 0
-  i.handle_event = handle_event or function() end
+  i.rate = 1
+  i.loop_type = 0
   i.loop_start = 0
   i.loop_end = 0
   i.rec_start_time = 0
@@ -30,6 +32,8 @@ function pattern:clear()
   self.overdub_state = 0
   self.events = {}
   self.event_count = 0
+  self.rate = 1
+  self.loop_type = 0
   self.loop_start = 0
   self.loop_end = 0
   self.rec_start_time = 0 -- works for overdub start time too
@@ -48,15 +52,16 @@ function pattern:rec(state)
 end
 
 --- record event
-function pattern:rec_event(e, event_container)
+function pattern:rec_event(data, event_container)
     if self.rec_state == 0 then return end
 
     local events = event_container or self.events
     local t = util.time() - self.rec_start_time
 
-    events[c] = pattern_event:new(e, t)
+    events[c] = pattern_event:new(data, t)
 end
 
+--- start overdubbing
 function pattern:overdub(state)
   if state == 1 and self.play_state == 1 and self.rec_state == 0 then
     self.overdub_state = 1
@@ -67,9 +72,10 @@ function pattern:overdub(state)
   end
 end
 
-function pattern:overdub_event(e)
+--- overdub event
+function pattern:overdub_event(data)
     if self.overdub_state == 0 then return end
-    self:rec_event(e, self.overdub_event_container)
+    self:rec_event(data, self.overdub_event_container)
 end
 
 function pattern:merge_overdub()
@@ -77,6 +83,7 @@ function pattern:merge_overdub()
     -- sorted by time from start of recording, i.e. 't'
 end
 
+--- start playing
 function pattern:play(state)
   if state == 1 then
       -- record stop?
@@ -86,6 +93,12 @@ function pattern:play(state)
   else
     print("invalid argument to ':play', use 1 or 0")
   end
+end
+
+--- play event
+function pattern:play_event(event)
+    -- wait duration * rate
+    -- pass event to pattern_time to be quantized
 end
 
 function pattern:loop_start(pos)
